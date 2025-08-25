@@ -1,4 +1,4 @@
-# adfv2
+# ADF Deployment Azure Government
 
 Terraform deployment for Azure Data Factory (ADF) in Azure US Government secured with a Customer Managed Key (CMK) stored in Azure Key Vault. A User Assigned Managed Identity (UAMI) is used so the identity exists before ADF creation, avoiding circular dependencies for encryption.
 
