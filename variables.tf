@@ -20,13 +20,12 @@ variable "enable_purge_protection" {
   default     = false
 }
 
-# Subscription ID to deploy into. Provide via -var or TF_VAR_subscription_id in CI if you
-# do not want to rely on a default. Not a secret, but can be omitted for flexibility.
-# If you prefer not to hard-code, remove the default line below.
+# Subscription ID to deploy into. Supply via -var 'subscription_id=...' or
+# environment variable TF_VAR_subscription_id. No default is set to avoid
+# accidentally targeting the wrong subscription.
 variable "subscription_id" {
   description = "Subscription ID to deploy into."
   type        = string
-  default     = "b0787450-4df4-4d5c-ada1-9aa3b0c1c944"
   validation {
     condition     = can(regex("^[0-9a-fA-F-]{36}$", var.subscription_id))
     error_message = "subscription_id must be a valid GUID."
