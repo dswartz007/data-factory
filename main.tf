@@ -37,7 +37,7 @@ provider "azurerm" {
   features {}
   environment = "usgovernment"
   # Optional: explicitly set subscription
-  # subscription_id = var.subscription_id
+  subscription_id = var.subscription_id
 }
 
 ############################################################
