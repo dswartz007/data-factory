@@ -47,15 +47,29 @@ provider "azurerm" {
 data "azurerm_client_config" "current" {}
 
 ############################################################
+# Random suffix for uniqueness
+############################################################
+
+resource "random_string" "suffix" {
+  length  = 5
+  upper   = false
+  lower   = true
+  numeric = true
+  special = false
+}
+
+############################################################
 # Locals
 ############################################################
 
 locals {
-  key_vault_name       = var.key_vault_name
-  resource_group_name  = var.resource_group_name
-  identity_name        = var.identity_name
-  adf_name             = var.data_factory_name
-  key_name             = "adf-cmk-az01"
+  base_prefix = var.name_prefix != "" ? var.name_prefix : "adfcmk-${random_string.suffix.result}"
+
+  key_vault_name       = substr(replace("${local.base_prefix}kv", "/[-_]/", ""), 0, 24)
+  resource_group_name  = "${local.base_prefix}-rg"
+  identity_name        = "${local.base_prefix}-id"
+  adf_name             = "${local.base_prefix}-adf"
+  key_name             = "adf-cmk"
 }
 
 ############################################################
@@ -174,14 +188,30 @@ resource "azurerm_data_factory" "adf" {
     identity_ids = [azurerm_user_assigned_identity.adf_identity.id]
   }
 
-  customer_managed_key_id = azurerm_key_vault_key.adf_kek.id
+  customer_managed_key_id         = azurerm_key_vault_key.adf_kek.id
+  customer_managed_key_identity_id = azurerm_user_assigned_identity.adf_identity.id
 
   tags = {
     environment = "demo"
     security    = "cmk"
   }
 
+  # Add explicit dependency on the key vault key
+  # The explicit dependency on the key and the implicit dependency on the identity
+  # via the customer_managed_key_identity_id should resolve the timing issue.
   depends_on = [
     azurerm_key_vault_key.adf_kek
   ]
 }
+
+
+
+
+
+
+
+
+
+
+
+
